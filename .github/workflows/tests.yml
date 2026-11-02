@@ -1,0 +1,73 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ruff
+        # Same version as the dev extra in pyproject.toml.
+        run: pip install "$(grep -o 'ruff==[0-9.]*' pyproject.toml)"
+
+      - name: Check formatting
+        run: ruff format --check .
+
+      - name: Lint
+        run: ruff check --output-format=github .
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+        # latest: newest torch + transformers allowed by pyproject.toml.
+        # pinned: the paper environment from requirements.txt.
+        deps: [latest, pinned]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            pyproject.toml
+            requirements.txt
+
+      - name: Install package and test dependencies (latest)
+        if: matrix.deps == 'latest'
+        run: |
+          python -m pip install --upgrade pip
+          # CPU-only torch: the test suite never needs CUDA.
+          pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+          pip install -e ".[dev]"
+
+      - name: Install package and test dependencies (pinned)
+        if: matrix.deps == 'pinned'
+        run: |
+          python -m pip install --upgrade pip
+          # CPU builds of the pinned torch/torchvision; requirements.txt then accepts them as is.
+          pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install -e . --no-deps
+          pip check
+
+      - name: Run test suite
+        run: pytest -v

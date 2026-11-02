@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "patch-where-objects-are"
+version = "0.1.0"
+description = "Objectness-guided mixed-resolution ViT patches for small-object detection in maritime scenes (DINOv3 + RT-DETR)"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+dependencies = [
+    "torch>=2.3",
+    "torchvision>=0.18",
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pycocotools>=2.0.6",
+    "pyyaml>=6.0",
+    "pillow>=9.0",
+    "transformers>=5.20,<6",
+]
+
+[project.optional-dependencies]
+wandb = ["wandb>=0.15"]
+demo = ["matplotlib>=3.7"]
+dev = ["pytest>=7.0", "ruff==0.16.9"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

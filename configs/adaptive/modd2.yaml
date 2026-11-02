@@ -1,0 +1,65 @@
+# Adaptive patching on MODD2: 1-epoch fine-tune of the uniform-832
+# checkpoint with a frozen backbone and constant LR 1e-5 (the only recipe).
+# Per run, override the selector, budget and seed, e.g.
+#   scripts/train.py --config configs/adaptive/modd2.yaml \
+#     --backbone.patch_selector entropy --backbone.token_budget 576 --train.seed 1 \
+#     --train.init_from <uniform checkpoint>
+# selector: objectness | feature_distortion | entropy | random
+# Ablations: --backbone.selector_pool mean, --backbone.selector_scoring
+# per_scale, --train.epochs 4. n=256 needs --head.num_queries 100.
+# scorer_checkpoint is read by objectness only.
+
+backbone:
+  type: dinov3_adaptive
+  patch_size: 16
+  img_size: 832
+  dinov3_variant: vitb16
+  dinov3_weights_path: ${DATA_ROOT}/pretrained/dinov3_vitb16_pretrain_lvd1689.pth
+  patch_selector: objectness
+  token_budget: 784
+  selector_pool: max
+  selector_scoring: finest
+  scorer_checkpoint: ${OUTPUT_ROOT}/objectness_scorer_{dataset}/s{seed}/scorer_best.pth
+
+fpn:
+  hidden_dim: 256
+
+head:
+  hidden_dim: 256
+  num_queries: 300
+  num_classes: 1
+  feat_strides: [16]
+  use_encoder_idx: [0]
+  num_decoder_layers: 6
+  num_denoising: 100
+  aux_loss: true
+  full_sparse: true
+
+data:
+  dataset: modd2
+  image_root: ${DATA_ROOT}/modd2
+  train_json: ${DATA_ROOT}/modd2/modd2_train_coco.json
+  val_json: ${DATA_ROOT}/modd2/modd2_val_coco.json
+  eval_include_empty: true
+
+train:
+  init_from: ""
+  epochs: 1
+  batch_size: 4
+  num_workers: 4
+  base_lr: 1.0e-05
+  min_lr: 1.0e-05
+  warmup_epochs: 0
+  weight_decay: 0.0001
+  clip_grad: 0.1
+  freeze_backbone_layers: 12
+  unfreeze_epoch: 999
+  layer_lr_decay: 0.75
+  iou_min: 0.3
+  confidence_threshold: 0.001
+  nms_iou_threshold: 0.5
+  use_amp: false
+  seed: 0
+  wandb: false
+  wandb_project: pwoa
+  output_root: ${OUTPUT_ROOT}

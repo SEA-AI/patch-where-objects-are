@@ -1,0 +1,14 @@
+# Exact versions of the environment used for the paper results
+# (Python 3.11.15; torch/torchvision CUDA 12.4 builds: 2.6.0+cu124 / 0.21.0+cu124).
+torch==2.6.0
+torchvision==0.21.0
+transformers==5.20.2
+numpy==2.4.4
+scipy==1.17.1
+pycocotools==2.0.11
+pyyaml==6.0.3
+pillow==12.2.0
+matplotlib==3.10.8
+pytest==9.0.3
+# Optional W&B logging (pip install -e ".[wandb]"); version used for the paper runs:
+# wandb==0.25.1

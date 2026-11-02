@@ -1,0 +1,52 @@
+# Uniform /16 baseline on LaRS at 256x256 (256 tokens), 35 epochs.
+# Run: scripts/train.py --config <this> --train.seed <s>
+
+backbone:
+  type: dinov3_adaptive
+  patch_size: 16
+  img_size: 256
+  dinov3_variant: vitb16
+  dinov3_weights_path: ${DATA_ROOT}/pretrained/dinov3_vitb16_pretrain_lvd1689.pth
+  patch_selector: uniform
+  token_budget: null
+
+fpn:
+  hidden_dim: 256
+
+head:
+  hidden_dim: 256
+  num_queries: 100
+  num_classes: 8
+  feat_strides: [16]
+  use_encoder_idx: [0]
+  num_decoder_layers: 6
+  num_denoising: 100
+  aux_loss: true
+
+data:
+  dataset: lars
+  image_root: ${DATA_ROOT}/lars/lars_v1.0.0_images
+  train_json: ${DATA_ROOT}/lars/lars_train_coco.json
+  val_json: ${DATA_ROOT}/lars/lars_val_coco.json
+  eval_include_empty: true
+
+train:
+  epochs: 35
+  batch_size: 8
+  num_workers: 4
+  base_lr: 0.0001
+  min_lr: 1.0e-06
+  warmup_epochs: 5
+  weight_decay: 0.0001
+  clip_grad: 0.1
+  freeze_backbone_layers: 8
+  unfreeze_epoch: 10
+  layer_lr_decay: 0.75
+  iou_min: 0.3
+  confidence_threshold: 0.001
+  nms_iou_threshold: 0.5
+  use_amp: false
+  seed: 42
+  wandb: false
+  wandb_project: pwoa
+  output_root: ${OUTPUT_ROOT}

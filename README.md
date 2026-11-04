@@ -4,7 +4,7 @@
 ![WACV 2027](https://img.shields.io/badge/WACV-2027-1f6feb)
 ![Python 3.11](https://img.shields.io/badge/python-3.11-3776ab?logo=python&logoColor=white)
 
-**Research code** of *Patch Where Objects Are: Objectness-Guided Mixed-Resolution ViTs for
+**Research code** to reproduce the results of the paper *Patch Where Objects Are: Objectness-Guided Mixed-Resolution ViTs for
 Small-Object Detection in Maritime Scenes* (WACV 2027).
 
 ## 📫 Updates
